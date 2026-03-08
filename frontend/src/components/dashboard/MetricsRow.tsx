@@ -11,7 +11,7 @@ export function MetricsRow({ expenses }: Props) {
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   });
   const monthTotal = thisMonth.reduce((sum, e) => sum + e.amount, 0);
-  const count = expenses.length;
+  const count = thisMonth.length;
 
   const monthLabel = now.toLocaleString("es-CO", { month: "long" });
 
