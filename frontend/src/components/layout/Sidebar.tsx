@@ -23,11 +23,11 @@ export function Sidebar({ isOpen, onClose }: Props) {
           ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
         `}
       >
-        <div className="flex justify-between items-center">
-          <img src="/logo.png.png" alt="MH Finance" className="h-16 w-auto rounded-xl" />
+        <div className="relative flex justify-center">
+          <img src="/logo.png" alt="MH Finance" className="w-48 h-auto rounded-xl" />
           <button
             onClick={onClose}
-            className="md:hidden text-gray-400 hover:text-gray-600 p-1 text-xl leading-none"
+            className="md:hidden absolute right-0 top-0 text-gray-400 hover:text-gray-600 p-1 text-xl leading-none"
             aria-label="Close sidebar"
           >
             ✕
