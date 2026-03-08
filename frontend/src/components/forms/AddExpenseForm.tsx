@@ -2,10 +2,20 @@ import { useState } from "react";
 import { useConfig } from "../../hooks/useConfig";
 import { useCreateExpense } from "../../hooks/useExpenses";
 
+function formatWithSeparator(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("es-CO", { maximumFractionDigits: 0 });
+}
+
+function parseAmount(formatted: string): number {
+  return parseFloat(formatted.replace(/\./g, ""));
+}
+
 export function AddExpenseForm() {
   const { data: config } = useConfig();
   const createExpense = useCreateExpense();
-  const [amount, setAmount] = useState("");
+  const [displayAmount, setDisplayAmount] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
 
@@ -13,12 +23,14 @@ export function AddExpenseForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!amount || !category) return;
+    if (!displayAmount || !category) return;
+    const amount = parseAmount(displayAmount);
+    if (!amount) return;
     createExpense.mutate(
-      { category, description, amount: parseFloat(amount) },
+      { category, description, amount },
       {
         onSuccess: () => {
-          setAmount("");
+          setDisplayAmount("");
           setDescription("");
           setCategory("");
         },
@@ -30,10 +42,11 @@ export function AddExpenseForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <h2 className="font-semibold text-sm text-gray-500 uppercase tracking-wide">Add Expense</h2>
       <input
-        type="number"
+        type="text"
+        inputMode="numeric"
         placeholder="Amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
+        value={displayAmount}
+        onChange={(e) => setDisplayAmount(formatWithSeparator(e.target.value))}
         className="border rounded px-3 py-2 text-sm w-full"
         required
       />

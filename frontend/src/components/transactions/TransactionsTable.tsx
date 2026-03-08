@@ -17,6 +17,8 @@ interface Props {
 
 const col = createColumnHelper<Expense>();
 
+const PAGE_SIZE = 10;
+
 export function TransactionsTable({ expenses }: Props) {
   const { data: config } = useConfig();
   const bulkUpdate = useBulkUpdateExpenses();
@@ -24,6 +26,7 @@ export function TransactionsTable({ expenses }: Props) {
   const [data, setData] = useState<Expense[]>([]);
   const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
   const [isDirty, setIsDirty] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     setData(expenses);
@@ -109,6 +112,9 @@ export function TransactionsTable({ expenses }: Props) {
     getSortedRowModel: getSortedRowModel(),
   });
 
+  const allRows = table.getRowModel().rows;
+  const visibleRows = showAll ? allRows : allRows.slice(0, PAGE_SIZE);
+
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
       <div className="flex justify-between items-center px-4 py-3 border-b">
@@ -142,7 +148,7 @@ export function TransactionsTable({ expenses }: Props) {
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => (
+            {visibleRows.map((row) => (
               <tr key={row.id} className="border-b last:border-0 hover:bg-gray-50">
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 py-2">
@@ -155,6 +161,16 @@ export function TransactionsTable({ expenses }: Props) {
         </table>
         {data.length === 0 && (
           <p className="text-center text-gray-400 text-sm py-8">No transactions yet</p>
+        )}
+        {allRows.length > PAGE_SIZE && (
+          <div className="px-4 py-3 border-t text-center">
+            <button
+              onClick={() => setShowAll((v) => !v)}
+              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+            >
+              {showAll ? "Show less" : `Show all ${allRows.length} transactions`}
+            </button>
+          </div>
         )}
       </div>
     </div>
