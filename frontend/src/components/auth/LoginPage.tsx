@@ -29,7 +29,9 @@ export function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-white rounded-lg border p-8 w-full max-w-sm">
-        <h1 className="text-lg font-semibold text-gray-800 mb-6">MH Finance</h1>
+        <div className="flex justify-center mb-6">
+          <img src="/logo.png.png" alt="MH Finance" className="h-24 w-auto rounded-xl" />
+        </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">

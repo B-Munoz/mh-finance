@@ -23,11 +23,8 @@ export function Sidebar({ isOpen, onClose }: Props) {
           ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
         `}
       >
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-lg font-bold text-gray-800">MH Finance</h1>
-            <p className="text-xs text-gray-400 mt-0.5">Personal Finance Manager</p>
-          </div>
+        <div className="flex justify-between items-center">
+          <img src="/logo.png.png" alt="MH Finance" className="h-16 w-auto rounded-xl" />
           <button
             onClick={onClose}
             className="md:hidden text-gray-400 hover:text-gray-600 p-1 text-xl leading-none"
