@@ -11,7 +11,7 @@ node_modules/
 dist/
 .vite/
 
-# Config with secrets
+# Config with secrets (DB URLs) — use settings.toml for non-secret config
 backend/config/users.toml
 
 # OS
