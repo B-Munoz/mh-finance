@@ -1,18 +1,37 @@
 import { useState } from "react";
 import { useAllocateIncome } from "../../hooks/useBudgets";
 
+function formatWithSeparator(raw: string): string {
+  // Keep only digits
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  // Add . as thousands separator (es-CO style)
+  return Number(digits).toLocaleString("es-CO", { maximumFractionDigits: 0 });
+}
+
+function parseAmount(formatted: string): number {
+  // Remove thousands separators (.) and parse
+  return parseFloat(formatted.replace(/\./g, ""));
+}
+
 export function IncomeForm() {
   const allocate = useAllocateIncome();
-  const [amount, setAmount] = useState("");
+  const [displayValue, setDisplayValue] = useState("");
   const [breakdown, setBreakdown] = useState<Record<string, number> | null>(null);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setDisplayValue(formatWithSeparator(e.target.value));
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!displayValue) return;
+    const amount = parseAmount(displayValue);
     if (!amount) return;
-    allocate.mutate(parseFloat(amount), {
+    allocate.mutate(amount, {
       onSuccess: (data) => {
         setBreakdown(data.allocations);
-        setAmount("");
+        setDisplayValue("");
       },
     });
   }
@@ -22,12 +41,12 @@ export function IncomeForm() {
       <h2 className="font-semibold text-sm text-gray-500 uppercase tracking-wide">Add Income</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
           placeholder="Income Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          value={displayValue}
+          onChange={handleChange}
           className="border rounded px-3 py-2 text-sm w-full"
-          min={0}
           required
         />
         <button

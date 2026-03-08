@@ -58,8 +58,13 @@ function IncomeRow({ record }: { record: IncomeRecord }) {
   );
 }
 
+const PAGE_SIZE = 10;
+
 export function IncomeHistory() {
   const { data: incomes = [], isLoading } = useIncomes();
+  const [showAll, setShowAll] = useState(false);
+
+  const visible = showAll ? incomes : incomes.slice(0, PAGE_SIZE);
 
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
@@ -80,13 +85,23 @@ export function IncomeHistory() {
               </tr>
             </thead>
             <tbody>
-              {incomes.map((record) => (
+              {visible.map((record) => (
                 <IncomeRow key={record.id} record={record} />
               ))}
             </tbody>
           </table>
           {incomes.length === 0 && (
             <p className="text-center text-gray-400 text-sm py-8">No income records yet</p>
+          )}
+          {incomes.length > PAGE_SIZE && (
+            <div className="px-4 py-3 border-t text-center">
+              <button
+                onClick={() => setShowAll((v) => !v)}
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+              >
+                {showAll ? "Show less" : `Show all ${incomes.length} entries`}
+              </button>
+            </div>
           )}
         </div>
       )}

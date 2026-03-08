@@ -11,13 +11,17 @@ export function BudgetCard({ budget }: Props) {
 
   const pct = progress !== null ? Math.round(progress * 100) : null;
 
-  // Gradient from green (0% spent) → yellow (50%) → red (100% spent)
+  // Discrete gradient: full (green) → empty (red)
+  function getBarColor(p: number): string {
+    if (p >= 75) return "#16a34a"; // green-600
+    if (p >= 50) return "#ca8a04"; // yellow-600
+    if (p >= 25) return "#ea580c"; // orange-600
+    return "#dc2626"; // red-600
+  }
+
   const barStyle: React.CSSProperties =
     pct !== null
-      ? {
-          width: `${pct}%`,
-          backgroundColor: `hsl(${Math.round(120 - pct * 1.2)}, 65%, 45%)`,
-        }
+      ? { width: `${pct}%`, backgroundColor: getBarColor(pct) }
       : { width: "100%", backgroundColor: "#60a5fa" };
 
   return (
