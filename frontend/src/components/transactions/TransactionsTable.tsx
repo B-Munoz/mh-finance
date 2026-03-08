@@ -17,7 +17,7 @@ interface Props {
 
 const col = createColumnHelper<Expense>();
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export function TransactionsTable({ expenses }: Props) {
   const { data: config } = useConfig();
@@ -79,14 +79,21 @@ export function TransactionsTable({ expenses }: Props) {
     }),
     col.accessor("amount", {
       header: "Amount ($)",
-      cell: (info) => (
-        <input
-          type="number"
-          value={info.getValue()}
-          onChange={(e) => updateCell(info.row.index, "amount", parseFloat(e.target.value))}
-          className="border-0 bg-transparent text-sm w-full text-right"
-        />
-      ),
+      cell: (info) => {
+        const val = info.getValue();
+        return (
+          <input
+            type="text"
+            inputMode="numeric"
+            value={val.toLocaleString("es-CO", { maximumFractionDigits: 0 })}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value.replace(/\./g, ""));
+              if (!isNaN(parsed)) updateCell(info.row.index, "amount", parsed);
+            }}
+            className="border-0 bg-transparent text-sm w-full text-right"
+          />
+        );
+      },
     }),
     col.display({
       id: "actions",
