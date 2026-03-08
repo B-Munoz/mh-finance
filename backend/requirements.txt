@@ -5,3 +5,6 @@ psycopg2-binary
 pydantic-settings
 python-dotenv
 tomli
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart

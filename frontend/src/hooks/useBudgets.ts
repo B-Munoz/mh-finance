@@ -14,6 +14,7 @@ export function useAllocateIncome() {
     mutationFn: (income_amount: number) => allocateIncome(income_amount),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["budgets"] });
+      qc.invalidateQueries({ queryKey: ["incomes"] });
     },
   });
 }

@@ -21,3 +21,10 @@ export interface UserConfig {
 export interface AllocationResult {
   allocations: Record<string, number>;
 }
+
+export interface IncomeRecord {
+  id: number;
+  date: string;
+  amount: number;
+  allocations: Record<string, number>;
+}

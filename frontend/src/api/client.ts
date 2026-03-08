@@ -1,14 +1,26 @@
 import axios from "axios";
 
 const client = axios.create({
-  baseURL: "/api/v1",
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? "/api/v1",
 });
 
 client.interceptors.request.use((config) => {
-  const params = new URLSearchParams(window.location.search);
-  const user = params.get("user") ?? "neon";
-  config.params = { ...config.params, user };
+  const token = localStorage.getItem("mh_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
+
+client.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("mh_token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default client;

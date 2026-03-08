@@ -1,3 +1,4 @@
+import os
 import tomli
 from pathlib import Path
 
@@ -14,6 +15,13 @@ CONNECTIONS: dict[str, str] = {
 USER_SETTINGS: dict[str, dict] = _raw.get("user_settings", {})
 
 KNOWN_USERS = list(CONNECTIONS.keys())
+
+# Credentials: env vars take precedence over TOML (for Railway deployment)
+_toml_credentials: dict[str, str] = _raw.get("credentials", {})
+CREDENTIALS: dict[str, str] = {
+    "neon": os.environ.get("MH_NEON_HASH") or _toml_credentials.get("neon", ""),
+    "pachi": os.environ.get("MH_PACHI_HASH") or _toml_credentials.get("pachi", ""),
+}
 
 
 def get_user_config(user_key: str) -> dict:

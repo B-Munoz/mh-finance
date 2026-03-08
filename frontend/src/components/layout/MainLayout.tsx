@@ -3,6 +3,7 @@ import { MetricsRow } from "../dashboard/MetricsRow";
 import { BudgetGrid } from "../dashboard/BudgetGrid";
 import { ExpensesChart } from "../dashboard/ExpensesChart";
 import { TransactionsTable } from "../transactions/TransactionsTable";
+import { IncomeHistory } from "../dashboard/IncomeHistory";
 import { useExpenses } from "../../hooks/useExpenses";
 
 export function MainLayout() {
@@ -23,6 +24,7 @@ export function MainLayout() {
             </section>
             <ExpensesChart expenses={expenses} />
             <TransactionsTable expenses={expenses} />
+            <IncomeHistory />
           </div>
         )}
       </main>

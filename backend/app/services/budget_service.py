@@ -1,5 +1,6 @@
 from sqlalchemy import text
 from app.db import get_engine
+from app.services import income_service
 
 
 def init_budgets_db(user_key: str, allocation_map: dict, limit_map: dict):
@@ -78,5 +79,7 @@ def allocate_income(user_key: str, income_amount: float, allocation_map: dict, l
                         text("UPDATE budgets SET current_balance = current_balance + :amt WHERE category = :cat"),
                         {"amt": amount, "cat": cat}
                     )
+
+    income_service.save_income_record(user_key, income_amount, allocations)
 
     return allocations
