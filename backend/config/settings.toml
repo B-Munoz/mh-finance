@@ -15,14 +15,14 @@ Vacaciones = 0
 
 [user_settings.neon.ALLOCATION_PCT]
 Transporte = 0.03
-Vivienda = 0.25
+Vivienda = 0.23
 Ocio = 0.08
 Salud = 0.02
 Ropa = 0.02
-"Misceláneo" = 0.20
+"Misceláneo" = 0.18
 Departamento = 0.05
-Ahorro = 0.30
-Vacaciones = 0.05
+Ahorro = 0.32
+Vacaciones = 0.02
 
 [user_settings.pachi.CATEGORY_CONFIG]
 Transporte = 500000
