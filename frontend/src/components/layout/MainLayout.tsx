@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { MetricsRow } from "../dashboard/MetricsRow";
 import { BudgetGrid } from "../dashboard/BudgetGrid";
@@ -8,11 +9,22 @@ import { useExpenses } from "../../hooks/useExpenses";
 
 export function MainLayout() {
   const { data: expenses = [], isLoading } = useExpenses();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <main className="flex-1 p-6 overflow-auto">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <main className="flex-1 p-4 md:p-6 overflow-auto min-w-0">
+        <div className="flex items-center gap-3 mb-4 md:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg bg-white border text-gray-600 hover:bg-gray-50 text-xl leading-none"
+            aria-label="Open sidebar"
+          >
+            ☰
+          </button>
+          <h1 className="text-lg font-bold text-gray-800">MH Finance</h1>
+        </div>
         {isLoading ? (
           <p className="text-gray-400">Loading...</p>
         ) : (

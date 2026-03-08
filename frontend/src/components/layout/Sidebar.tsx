@@ -1,17 +1,46 @@
 import { AddExpenseForm } from "../forms/AddExpenseForm";
 import { IncomeForm } from "../forms/IncomeForm";
 
-export function Sidebar() {
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ isOpen, onClose }: Props) {
   return (
-    <aside className="w-72 min-h-screen bg-white border-r p-5 flex flex-col gap-6 shrink-0">
-      <div>
-        <h1 className="text-lg font-bold text-gray-800">MH Finance</h1>
-        <p className="text-xs text-gray-400 mt-0.5">Personal Finance Manager</p>
-      </div>
-      <hr />
-      <AddExpenseForm />
-      <hr />
-      <IncomeForm />
-    </aside>
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-20 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <aside
+        className={`
+          fixed md:static inset-y-0 left-0 z-30
+          w-72 min-h-screen bg-white border-r p-5 flex flex-col gap-6 shrink-0
+          transform transition-transform duration-300 ease-in-out overflow-y-auto
+          ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
+        `}
+      >
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-lg font-bold text-gray-800">MH Finance</h1>
+            <p className="text-xs text-gray-400 mt-0.5">Personal Finance Manager</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="md:hidden text-gray-400 hover:text-gray-600 p-1 text-xl leading-none"
+            aria-label="Close sidebar"
+          >
+            ✕
+          </button>
+        </div>
+        <hr />
+        <AddExpenseForm />
+        <hr />
+        <IncomeForm />
+      </aside>
+    </>
   );
 }

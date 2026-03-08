@@ -10,8 +10,15 @@ export function BudgetCard({ budget }: Props) {
   const progress = hasLimit ? Math.min(Math.max(current_balance / limit, 0), 1) : null;
 
   const pct = progress !== null ? Math.round(progress * 100) : null;
-  const barColor =
-    pct === null ? "bg-blue-400" : pct >= 90 ? "bg-red-500" : pct >= 70 ? "bg-yellow-500" : "bg-blue-500";
+
+  // Gradient from green (0% spent) → yellow (50%) → red (100% spent)
+  const barStyle: React.CSSProperties =
+    pct !== null
+      ? {
+          width: `${pct}%`,
+          backgroundColor: `hsl(${Math.round(120 - pct * 1.2)}, 65%, 45%)`,
+        }
+      : { width: "100%", backgroundColor: "#60a5fa" };
 
   return (
     <div className="bg-white rounded-lg border p-4 flex flex-col gap-2">
@@ -29,8 +36,8 @@ export function BudgetCard({ budget }: Props) {
       {hasLimit && progress !== null && (
         <div className="w-full bg-gray-100 rounded-full h-2">
           <div
-            className={`${barColor} h-2 rounded-full transition-all`}
-            style={{ width: `${pct}%` }}
+            className="h-2 rounded-full transition-all"
+            style={barStyle}
           />
         </div>
       )}
