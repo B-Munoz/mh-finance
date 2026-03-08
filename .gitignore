@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Config with secrets
+backend/config/users.toml
+
+# OS
+.DS_Store
+desktop.ini
