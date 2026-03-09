@@ -83,3 +83,48 @@ def allocate_income(user_key: str, income_amount: float, allocation_map: dict, l
     income_service.save_income_record(user_key, income_amount, allocations)
 
     return allocations
+
+
+def relocate_budget(user_key: str, from_cat: str, to_cat: str, amount: float) -> dict:
+    balances = get_balances(user_key)
+    if from_cat not in balances:
+        raise ValueError(f"Category '{from_cat}' does not exist")
+    if to_cat not in balances:
+        raise ValueError(f"Category '{to_cat}' does not exist")
+    if balances[from_cat] < amount:
+        raise ValueError(f"Insufficient balance in '{from_cat}'")
+
+    with get_engine(user_key).connect() as conn:
+        with conn.begin():
+            conn.execute(
+                text("UPDATE budgets SET current_balance = current_balance - :amt WHERE category = :cat"),
+                {"amt": amount, "cat": from_cat},
+            )
+            conn.execute(
+                text("UPDATE budgets SET current_balance = current_balance + :amt WHERE category = :cat"),
+                {"amt": amount, "cat": to_cat},
+            )
+
+    new_balances = get_balances(user_key)
+    return {
+        "from_new_balance": new_balances[from_cat],
+        "to_new_balance": new_balances[to_cat],
+    }
+
+
+def direct_deposit(user_key: str, category: str, amount: float) -> float:
+    balances = get_balances(user_key)
+    if category not in balances:
+        raise ValueError(f"Category '{category}' does not exist")
+
+    with get_engine(user_key).connect() as conn:
+        with conn.begin():
+            conn.execute(
+                text("UPDATE budgets SET current_balance = current_balance + :amt WHERE category = :cat"),
+                {"amt": amount, "cat": category},
+            )
+
+    income_service.save_income_record(user_key, amount, {category: amount})
+
+    new_balances = get_balances(user_key)
+    return new_balances[category]

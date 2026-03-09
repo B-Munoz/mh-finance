@@ -1,5 +1,6 @@
 import { AddExpenseForm } from "../forms/AddExpenseForm";
 import { IncomeForm } from "../forms/IncomeForm";
+import { RelocateForm } from "../forms/RelocateForm";
 
 interface Props {
   isOpen: boolean;
@@ -37,6 +38,8 @@ export function Sidebar({ isOpen, onClose }: Props) {
         <AddExpenseForm />
         <hr />
         <IncomeForm />
+        <hr />
+        <RelocateForm />
       </aside>
     </>
   );

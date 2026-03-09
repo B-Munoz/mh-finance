@@ -28,3 +28,22 @@ export interface IncomeRecord {
   amount: number;
   allocations: Record<string, number>;
 }
+
+export interface RelocateResult {
+  from_category: string;
+  to_category: string;
+  amount: number;
+  from_new_balance: number;
+  to_new_balance: number;
+}
+
+export interface DirectDepositResult {
+  category: string;
+  amount: number;
+  new_balance: number;
+}
+
+export interface UserSettings {
+  allocation_pct: Record<string, number>;
+  category_limits: Record<string, number>;
+}
