@@ -5,7 +5,7 @@ from app.models.budget import (
     BudgetRelocateRequest, BudgetRelocateResponse,
     DirectDepositRequest, DirectDepositResponse,
 )
-from app.services import budget_service
+from app.services import budget_service, settings_service
 
 router = APIRouter(prefix="/budgets", tags=["budgets"])
 
@@ -13,6 +13,7 @@ router = APIRouter(prefix="/budgets", tags=["budgets"])
 @router.get("", response_model=list[BudgetBalance])
 def list_budgets(user_cfg=Depends(get_user_cfg)):
     cfg, user_key = user_cfg
+    cfg = settings_service.get_effective_config(user_key, cfg)
     balances = budget_service.get_balances(user_key)
     result = []
     for cat, limit in cfg["limits"].items():
@@ -27,6 +28,7 @@ def list_budgets(user_cfg=Depends(get_user_cfg)):
 @router.post("/allocate", response_model=IncomeAllocateResponse)
 def allocate_income(body: IncomeAllocateRequest, user_cfg=Depends(get_user_cfg)):
     cfg, user_key = user_cfg
+    cfg = settings_service.get_effective_config(user_key, cfg)
     allocations = budget_service.allocate_income(
         user_key,
         body.income_amount,

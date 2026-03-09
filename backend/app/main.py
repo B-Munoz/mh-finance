@@ -37,7 +37,10 @@ app.include_router(settings_router.router, prefix="/api/v1")
 def startup():
     for user_key in KNOWN_USERS:
         cfg = get_user_config(user_key)
-        settings_service.init_settings_db(user_key)
+        try:
+            settings_service.init_settings_db(user_key)
+        except Exception as e:
+            print(f"[startup] settings_service.init_settings_db({user_key}) failed: {e}")
         expense_service.init_expenses_db(user_key)
         budget_service.init_budgets_db(user_key, cfg["allocation_pct"], cfg["limits"])
         income_service.init_incomes_db(user_key)
