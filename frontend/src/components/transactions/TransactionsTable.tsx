@@ -27,6 +27,7 @@ export function TransactionsTable({ expenses }: Props) {
   const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
   const [isDirty, setIsDirty] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
 
   useEffect(() => {
     setData(expenses);
@@ -42,8 +43,14 @@ export function TransactionsTable({ expenses }: Props) {
     setIsDirty(true);
   }
 
-  function handleDelete(expense: Expense) {
-    deleteExpense.mutate(expense.id);
+  function handleDeleteClick(expense: Expense) {
+    if (confirmingId === expense.id) {
+      deleteExpense.mutate(expense.id);
+      setConfirmingId(null);
+    } else {
+      setConfirmingId(expense.id);
+      setTimeout(() => setConfirmingId((cur) => (cur === expense.id ? null : cur)), 5000);
+    }
   }
 
   const columns = [
@@ -98,15 +105,35 @@ export function TransactionsTable({ expenses }: Props) {
     col.display({
       id: "actions",
       header: "",
-      cell: (info) => (
-        <button
-          onClick={() => handleDelete(info.row.original)}
-          className="text-red-500 hover:text-red-700 text-xs px-2"
-          title="Delete"
-        >
-          ✕
-        </button>
-      ),
+      cell: (info) => {
+        const expense = info.row.original;
+        const isConfirming = confirmingId === expense.id;
+        return isConfirming ? (
+          <span className="flex items-center gap-1">
+            <button
+              onClick={() => handleDeleteClick(expense)}
+              disabled={deleteExpense.isPending}
+              className="text-red-600 text-xs font-medium hover:text-red-800 disabled:opacity-50"
+            >
+              Confirm
+            </button>
+            <button
+              onClick={() => setConfirmingId(null)}
+              className="text-gray-500 text-xs hover:text-gray-700"
+            >
+              Cancel
+            </button>
+          </span>
+        ) : (
+          <button
+            onClick={() => handleDeleteClick(expense)}
+            className="text-red-500 hover:text-red-700 text-xs px-2"
+            title="Delete"
+          >
+            ✕
+          </button>
+        );
+      },
     }),
   ];
 

@@ -1,6 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSettings, saveSettings } from "../api/settings";
+import { getSettings, saveSettings, addCategory, deleteCategory, renameCategory } from "../api/settings";
 import type { UserSettings } from "../types";
+
+const INVALIDATE_KEYS = [["settings"], ["config"], ["budgets"]];
+
+function useInvalidateAll() {
+  const qc = useQueryClient();
+  return () => INVALIDATE_KEYS.forEach((key) => qc.invalidateQueries({ queryKey: key }));
+}
 
 export function useSettings() {
   return useQuery({
@@ -10,13 +17,34 @@ export function useSettings() {
 }
 
 export function useSaveSettings() {
-  const qc = useQueryClient();
+  const invalidateAll = useInvalidateAll();
   return useMutation({
     mutationFn: (payload: Partial<UserSettings>) => saveSettings(payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["settings"] });
-      qc.invalidateQueries({ queryKey: ["config"] });
-      qc.invalidateQueries({ queryKey: ["budgets"] });
-    },
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useAddCategory() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (name: string) => addCategory(name),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useDeleteCategory() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (name: string) => deleteCategory(name),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useRenameCategory() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: ({ oldName, newName }: { oldName: string; newName: string }) =>
+      renameCategory(oldName, newName),
+    onSuccess: invalidateAll,
   });
 }

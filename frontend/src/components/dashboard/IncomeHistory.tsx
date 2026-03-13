@@ -8,7 +8,18 @@ function formatCurrency(n: number) {
 
 function IncomeRow({ record }: { record: IncomeRecord }) {
   const [expanded, setExpanded] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const deleteIncome = useDeleteIncome();
+
+  function handleDeleteClick() {
+    if (confirming) {
+      deleteIncome.mutate(record.id);
+      setConfirming(false);
+    } else {
+      setConfirming(true);
+      setTimeout(() => setConfirming(false), 5000);
+    }
+  }
 
   return (
     <>
@@ -28,14 +39,32 @@ function IncomeRow({ record }: { record: IncomeRecord }) {
           </button>
         </td>
         <td className="px-4 py-2">
-          <button
-            onClick={() => deleteIncome.mutate(record.id)}
-            disabled={deleteIncome.isPending}
-            className="text-red-500 hover:text-red-700 text-xs px-2 disabled:opacity-50"
-            title="Delete and reverse allocations"
-          >
-            ✕
-          </button>
+          {confirming ? (
+            <span className="flex items-center gap-1">
+              <button
+                onClick={handleDeleteClick}
+                disabled={deleteIncome.isPending}
+                className="text-red-600 text-xs font-medium hover:text-red-800 disabled:opacity-50"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setConfirming(false)}
+                className="text-gray-500 text-xs hover:text-gray-700"
+              >
+                Cancel
+              </button>
+            </span>
+          ) : (
+            <button
+              onClick={handleDeleteClick}
+              disabled={deleteIncome.isPending}
+              className="text-red-500 hover:text-red-700 text-xs px-2 disabled:opacity-50"
+              title="Delete and reverse allocations"
+            >
+              ✕
+            </button>
+          )}
         </td>
       </tr>
       {expanded && (
