@@ -25,7 +25,7 @@ export function Sidebar({ isOpen, onClose }: Props) {
         `}
       >
         <div className="relative flex justify-center">
-          <img src="/logo.png" alt="MH Finance" className="w-36 h-auto rounded-xl" />
+          <img src="/logo.png" alt="MH Finance" className="w-[173px] h-auto rounded-xl" />
           <button
             onClick={onClose}
             className="md:hidden absolute right-0 top-0 text-gray-400 hover:text-gray-600 p-1 text-xl leading-none"
