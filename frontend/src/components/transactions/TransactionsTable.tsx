@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -53,7 +53,7 @@ export function TransactionsTable({ expenses }: Props) {
     }
   }
 
-  const columns = [
+  const columns = useMemo(() => [
     col.accessor("date", {
       header: "Date",
       cell: (info) => new Date(info.getValue()).toLocaleDateString("es-CO"),
@@ -135,7 +135,8 @@ export function TransactionsTable({ expenses }: Props) {
         );
       },
     }),
-  ];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [config?.categories, confirmingId, deleteExpense.isPending]);
 
   const table = useReactTable({
     data,
@@ -149,19 +150,41 @@ export function TransactionsTable({ expenses }: Props) {
   const allRows = table.getRowModel().rows;
   const visibleRows = showAll ? allRows : allRows.slice(0, PAGE_SIZE);
 
+  function handleDiscard() {
+    setData(expenses);
+    setIsDirty(false);
+  }
+
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
-      <div className="flex justify-between items-center px-4 py-3 border-b">
+      {isDirty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-80 flex flex-col gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Unsaved changes</p>
+              <p className="text-xs text-gray-500 mt-1">Do you want to save or discard your edits?</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => bulkUpdate.mutate(data, { onSuccess: () => setIsDirty(false) })}
+                disabled={bulkUpdate.isPending}
+                className="flex-1 bg-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                {bulkUpdate.isPending ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={handleDiscard}
+                disabled={bulkUpdate.isPending}
+                className="flex-1 border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="flex items-center px-4 py-3 border-b">
         <p className="text-sm font-semibold text-gray-700">Transactions</p>
-        {isDirty && (
-          <button
-            onClick={() => bulkUpdate.mutate(data, { onSuccess: () => setIsDirty(false) })}
-            disabled={bulkUpdate.isPending}
-            className="bg-blue-600 text-white rounded px-3 py-1.5 text-xs font-medium hover:bg-blue-700 disabled:opacity-50"
-          >
-            {bulkUpdate.isPending ? "Saving..." : "Save Changes"}
-          </button>
-        )}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
