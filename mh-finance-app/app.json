@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "MH Finance",
+    "slug": "mh-finance-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f9fafb"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.mhfinance.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#f9fafb",
+        "foregroundImage": "./assets/logo.png"
+      },
+      "package": "com.mhfinance.app"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
