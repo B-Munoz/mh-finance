@@ -1,4 +1,3 @@
-import { AddExpenseForm } from "../forms/AddExpenseForm";
 import { IncomeForm } from "../forms/IncomeForm";
 import { RelocateForm } from "../forms/RelocateForm";
 
@@ -34,8 +33,6 @@ export function Sidebar({ isOpen, onClose }: Props) {
             ✕
           </button>
         </div>
-        <hr />
-        <AddExpenseForm />
         <hr />
         <IncomeForm />
         <hr />
