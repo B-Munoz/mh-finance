@@ -6,6 +6,14 @@ interface Props {
   budget: Budget;
 }
 
+function fmtAmount(n: number): string {
+  if (n >= 1_000_000)
+    return "$" + (n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 1 }) + "M";
+  if (n >= 1_000)
+    return "$" + (n / 1_000).toLocaleString("es-CO", { maximumFractionDigits: 1 }) + "K";
+  return "$" + n.toLocaleString("es-CO", { maximumFractionDigits: 0 });
+}
+
 export function BudgetCard({ budget }: Props) {
   const { category, current_balance, limit } = budget;
   const hasLimit = limit > 0;
@@ -29,27 +37,21 @@ export function BudgetCard({ budget }: Props) {
 
   return (
     <>
-    <div className="bg-white rounded-lg border p-4 flex flex-col gap-2">
-      <div className="flex justify-between items-start">
+    <div className="relative bg-white rounded-lg border p-4 flex flex-col gap-2">
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="absolute top-2 right-2 text-gray-300 hover:text-blue-600 text-2xl font-bold leading-none"
+        aria-label={`Add expense to ${category}`}
+      >
+        +
+      </button>
+      <div className="flex justify-between items-start pr-6">
         <p className="font-medium text-sm">{category}</p>
-        <div className="flex items-center gap-2">
-          {hasLimit && (
-            <span className="text-xs text-gray-400">
-              / ${limit.toLocaleString("es-CO", { maximumFractionDigits: 0 })}
-            </span>
-          )}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="text-gray-400 hover:text-blue-600 text-4xl font-bold leading-none"
-            aria-label={`Add expense to ${category}`}
-          >
-            +
-          </button>
-        </div>
+        {hasLimit && (
+          <span className="text-xs text-gray-400">/ {fmtAmount(limit)}</span>
+        )}
       </div>
-      <p className="text-xl font-bold">
-        ${current_balance.toLocaleString("es-CO", { maximumFractionDigits: 0 })}
-      </p>
+      <p className="text-xl font-bold">${current_balance.toLocaleString("es-CO", { maximumFractionDigits: 0 })}</p>
       {hasLimit && progress !== null && (
         <div className="w-full bg-gray-100 rounded-full h-2">
           <div
