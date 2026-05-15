@@ -20,3 +20,5 @@ backend/config/users.toml
 # OS
 .DS_Store
 desktop.ini
+.vercel
+.env*.local
