@@ -13,5 +13,6 @@ export function apiError(err: unknown) {
   const e = err as { status?: number; message?: string };
   const status = e.status ?? 500;
   const detail = e.message ?? "Internal server error";
+  if (status >= 500) console.error("[api error]", err);
   return Response.json({ detail }, { status });
 }
