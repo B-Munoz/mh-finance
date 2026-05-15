@@ -1,9 +1,0 @@
-{
-  "name": "MH Finance",
-  "short_name": "MH Finance",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#f9fafb",
-  "theme_color": "#ffffff",
-  "icons": [{ "src": "/logo.png", "sizes": "any", "type": "image/png" }]
-}
