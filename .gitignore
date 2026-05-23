@@ -1,24 +1,19 @@
-# Python
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-venv/
-.env
-
-# Node
+# Dependencies
 node_modules/
+
+# Build output
 dist/
-.vite/
 .next/
 *.pack
 *.pack.gz
 
-# Config with secrets (DB URLs) — use settings.toml for non-secret config
-backend/config/users.toml
+# Environment / secrets
+.env
+.env*.local
+
+# Vercel
+.vercel
 
 # OS
 .DS_Store
 desktop.ini
-.vercel
-.env*.local
