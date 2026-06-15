@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import type { Expense } from "@/types";
+import { Card } from "@/components/ui/Card";
+import { Select } from "@/components/ui/Select";
 
 interface Props {
   expenses: Expense[];
@@ -56,36 +58,36 @@ export function ExpensesChart({ expenses }: Props) {
     : `Año ${selectedYear}`;
 
   return (
-    <div className="bg-white rounded-lg border p-4">
+    <Card padding="sm">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-        <p className="text-sm font-semibold text-gray-700 flex-1">
-          Gastos por Categoría — <span className="text-gray-500 font-normal">{periodLabel}</span>
+        <p className="text-sm font-semibold text-gray-100 flex-1">
+          Gastos por Categoría — <span className="text-sidebar-muted font-normal">{periodLabel}</span>
         </p>
         <div className="flex flex-wrap gap-2 items-center">
-          <select value={period} onChange={(e) => setPeriod(e.target.value as Period)} className="border rounded px-2 py-1 text-xs text-gray-600">
+          <Select uiSize="sm" value={period} onChange={(e) => setPeriod(e.target.value as Period)} className="w-auto">
             <option value="month">Mes</option>
             <option value="quarter">Trimestre</option>
             <option value="semester">Semestre</option>
             <option value="year">Año</option>
-          </select>
+          </Select>
           {period === "month" && (
-            <select value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))} className="border rounded px-2 py-1 text-xs text-gray-600">
+            <Select uiSize="sm" value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))} className="w-auto">
               {MONTHS_ES.map((name, i) => <option key={i + 1} value={i + 1}>{name}</option>)}
-            </select>
+            </Select>
           )}
           {period === "quarter" && (
-            <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(Number(e.target.value))} className="border rounded px-2 py-1 text-xs text-gray-600">
+            <Select uiSize="sm" value={selectedQuarter} onChange={(e) => setSelectedQuarter(Number(e.target.value))} className="w-auto">
               {QUARTERS.map((label, i) => <option key={i + 1} value={i + 1}>{label}</option>)}
-            </select>
+            </Select>
           )}
           {period === "semester" && (
-            <select value={selectedSemester} onChange={(e) => setSelectedSemester(Number(e.target.value))} className="border rounded px-2 py-1 text-xs text-gray-600">
+            <Select uiSize="sm" value={selectedSemester} onChange={(e) => setSelectedSemester(Number(e.target.value))} className="w-auto">
               {SEMESTERS.map((label, i) => <option key={i + 1} value={i + 1}>{label}</option>)}
-            </select>
+            </Select>
           )}
-          <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))} className="border rounded px-2 py-1 text-xs text-gray-600">
+          <Select uiSize="sm" value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))} className="w-auto">
             {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
+          </Select>
         </div>
       </div>
       {data.length === 0 ? (
@@ -93,13 +95,18 @@ export function ExpensesChart({ expenses }: Props) {
       ) : (
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
-            <XAxis dataKey="category" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v: number) => `$${v.toLocaleString("es-CO")}`} />
-            <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            <XAxis dataKey="category" tick={{ fontSize: 11, fill: "#94a3b8" }} />
+            <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+            <Tooltip
+              formatter={(v: number) => `$${v.toLocaleString("es-CO")}`}
+              contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
+              labelStyle={{ color: "#f1f5f9" }}
+              itemStyle={{ color: "#f1f5f9" }}
+            />
+            <Bar dataKey="amount" fill="#10b981" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}
-    </div>
+    </Card>
   );
 }

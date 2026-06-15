@@ -3,16 +3,9 @@
 import { useState } from "react";
 import { useConfig } from "@/hooks/useConfig";
 import { useRelocateBudget } from "@/hooks/useBudgets";
+import { formatWithSeparator, parseAmount } from "@/lib/format";
 
-function formatWithSeparator(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  if (!digits) return "";
-  return Number(digits).toLocaleString("es-CO", { maximumFractionDigits: 0 });
-}
-
-function parseAmount(formatted: string): number {
-  return parseFloat(formatted.replace(/\./g, ""));
-}
+const darkFieldClass = "bg-sidebar-hover border border-sidebar-border text-white placeholder:text-sidebar-muted rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors";
 
 export function RelocateForm() {
   const { data: config } = useConfig();
@@ -36,21 +29,21 @@ export function RelocateForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <h2 className="font-semibold text-sm text-gray-500 uppercase tracking-wide">Relocate Budget</h2>
-      <select value={fromCat} onChange={(e) => setFromCat(e.target.value)} className="border rounded px-3 py-2 text-sm w-full" required>
+      <h2 className="font-semibold text-sm text-sidebar-muted uppercase tracking-wide">Relocate Budget</h2>
+      <select value={fromCat} onChange={(e) => setFromCat(e.target.value)} className={darkFieldClass} required>
         <option value="">From category</option>
         {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
       </select>
-      <select value={toCat} onChange={(e) => setToCat(e.target.value)} className="border rounded px-3 py-2 text-sm w-full" required>
+      <select value={toCat} onChange={(e) => setToCat(e.target.value)} className={darkFieldClass} required>
         <option value="">To category</option>
         {categories.filter((c) => c !== fromCat).map((cat) => <option key={cat} value={cat}>{cat}</option>)}
       </select>
-      <input type="text" inputMode="numeric" placeholder="Amount" value={displayAmount} onChange={(e) => setDisplayAmount(formatWithSeparator(e.target.value))} className="border rounded px-3 py-2 text-sm w-full" required />
-      <button type="submit" disabled={relocate.isPending} className="bg-purple-600 text-white rounded px-3 py-2 text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
+      <input type="text" inputMode="numeric" placeholder="Amount" value={displayAmount} onChange={(e) => setDisplayAmount(formatWithSeparator(e.target.value))} className={darkFieldClass} required />
+      <button type="submit" disabled={relocate.isPending} className="bg-purple-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:bg-purple-700 disabled:opacity-50 transition-colors">
         {relocate.isPending ? "Moving..." : "Relocate"}
       </button>
-      {relocate.isSuccess && <p className="text-green-600 text-xs">Relocated!</p>}
-      {relocate.isError && <p className="text-red-600 text-xs">{(relocate.error as any)?.response?.data?.detail ?? "Error"}</p>}
+      {relocate.isSuccess && <p className="text-green-400 text-xs">Relocated!</p>}
+      {relocate.isError && <p className="text-red-400 text-xs">{(relocate.error as any)?.response?.data?.detail ?? "Error"}</p>}
     </form>
   );
 }

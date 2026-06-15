@@ -1,17 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { X } from "lucide-react";
 import { useCreateExpense } from "@/hooks/useExpenses";
-
-function formatWithSeparator(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  if (!digits) return "";
-  return Number(digits).toLocaleString("es-CO", { maximumFractionDigits: 0 });
-}
-
-function parseAmount(formatted: string): number {
-  return parseFloat(formatted.replace(/\./g, ""));
-}
+import { formatWithSeparator, parseAmount } from "@/lib/format";
+import { Modal } from "@/components/ui/Modal";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
   category: string;
@@ -32,36 +27,34 @@ export function AddExpenseModal({ category, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-lg p-6 w-80 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between items-center">
-          <h2 className="font-semibold text-sm text-gray-500 uppercase tracking-wide">Add Expense</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none" aria-label="Close">✕</button>
-        </div>
-        <p className="text-sm font-medium text-gray-700">{category}</p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="Amount"
-            value={displayAmount}
-            onChange={(e) => setDisplayAmount(formatWithSeparator(e.target.value))}
-            className="border rounded px-3 py-2 text-sm w-full"
-            autoFocus
-            required
-          />
-          <input
-            type="text"
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="border rounded px-3 py-2 text-sm w-full"
-          />
-          <button type="submit" disabled={createExpense.isPending} className="bg-blue-600 text-white rounded px-3 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-            {createExpense.isPending ? "Adding..." : "Add Expense"}
-          </button>
-        </form>
+    <Modal onClose={onClose} className="w-80">
+      <div className="flex justify-between items-center">
+        <h2 className="font-semibold text-sm text-sidebar-muted uppercase tracking-wide">Add Expense</h2>
+        <button onClick={onClose} className="text-sidebar-muted hover:text-gray-200 p-1 rounded-lg hover:bg-white/5 transition-colors" aria-label="Close">
+          <X size={18} />
+        </button>
       </div>
-    </div>
+      <p className="text-sm font-medium text-gray-100">{category}</p>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <Input
+          type="text"
+          inputMode="numeric"
+          placeholder="Amount"
+          value={displayAmount}
+          onChange={(e) => setDisplayAmount(formatWithSeparator(e.target.value))}
+          autoFocus
+          required
+        />
+        <Input
+          type="text"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <Button type="submit" variant="primary" disabled={createExpense.isPending}>
+          {createExpense.isPending ? "Adding..." : "Add Expense"}
+        </Button>
+      </form>
+    </Modal>
   );
 }

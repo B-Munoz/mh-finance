@@ -9,9 +9,12 @@ import {
   createColumnHelper,
   type SortingState,
 } from "@tanstack/react-table";
+import { ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import type { Expense } from "@/types";
 import { useConfig } from "@/hooks/useConfig";
 import { useBulkUpdateExpenses, useDeleteExpense } from "@/hooks/useExpenses";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
   expenses: Expense[];
@@ -65,7 +68,7 @@ export function TransactionsTable({ expenses }: Props) {
     col.accessor("category", {
       header: "Category",
       cell: (info) => (
-        <select value={info.getValue()} onChange={(e) => { updateCell(info.row.index, "category", e.target.value); setShowModal(true); }} className="border-0 bg-transparent text-sm w-full">
+        <select value={info.getValue()} onChange={(e) => { updateCell(info.row.index, "category", e.target.value); setShowModal(true); }} className="border-0 bg-transparent text-sm w-full rounded px-1 -mx-1 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:bg-white/5 text-gray-100 transition-colors">
           {(configRef.current?.categories ?? []).map((cat) => <option key={cat} value={cat}>{cat}</option>)}
         </select>
       ),
@@ -73,7 +76,7 @@ export function TransactionsTable({ expenses }: Props) {
     col.accessor("description", {
       header: "Description",
       cell: (info) => (
-        <input value={info.getValue()} onChange={(e) => updateCell(info.row.index, "description", e.target.value)} onBlur={() => { if (isDirtyRef.current) setShowModal(true); }} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} className="border-0 bg-transparent text-sm w-full" />
+        <input value={info.getValue()} onChange={(e) => updateCell(info.row.index, "description", e.target.value)} onBlur={() => { if (isDirtyRef.current) setShowModal(true); }} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} className="border-0 bg-transparent text-sm w-full rounded px-1 -mx-1 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:bg-white/5 text-gray-100 transition-colors" />
       ),
     }),
     col.accessor("amount", {
@@ -86,7 +89,7 @@ export function TransactionsTable({ expenses }: Props) {
           onChange={(e) => { const parsed = parseFloat(e.target.value.replace(/\./g, "")); if (!isNaN(parsed)) updateCell(info.row.index, "amount", parsed); }}
           onBlur={() => { if (isDirtyRef.current) setShowModal(true); }}
           onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
-          className="border-0 bg-transparent text-sm w-full text-right"
+          className="border-0 bg-transparent text-sm w-full text-right rounded px-1 -mx-1 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:bg-white/5 text-gray-100 transition-colors"
         />
       ),
     }),
@@ -98,15 +101,15 @@ export function TransactionsTable({ expenses }: Props) {
         const isConfirming = confirmingIdRef.current === expense.id;
         return isConfirming ? (
           <span className="flex items-center gap-1">
-            <button onClick={() => { deleteExpenseRef.current.mutate(expense.id); setConfirmingId(null); }} disabled={deleteExpenseRef.current.isPending} className="text-red-600 text-xs font-medium hover:text-red-800 disabled:opacity-50">Confirm</button>
-            <button onClick={() => setConfirmingId(null)} className="text-gray-500 text-xs hover:text-gray-700">Cancel</button>
+            <button onClick={() => { deleteExpenseRef.current.mutate(expense.id); setConfirmingId(null); }} disabled={deleteExpenseRef.current.isPending} className="text-red-400 text-xs font-medium hover:text-red-300 disabled:opacity-50">Confirm</button>
+            <button onClick={() => setConfirmingId(null)} className="text-sidebar-muted text-xs hover:text-gray-200">Cancel</button>
           </span>
         ) : (
           <button
             onClick={() => { setConfirmingId(expense.id); setTimeout(() => { setConfirmingId((cur) => (cur === expense.id ? null : cur)); }, 5000); }}
-            className="text-red-500 hover:text-red-700 text-xs px-2"
+            className="text-red-400 hover:text-red-300 p-1 rounded-lg hover:bg-red-500/10 transition-colors"
             title="Delete"
-          >✕</button>
+          ><Trash2 size={14} /></button>
         );
       },
     }),
@@ -123,35 +126,37 @@ export function TransactionsTable({ expenses }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-lg border overflow-hidden">
+    <Card padding="none" className="overflow-hidden">
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-80 flex flex-col gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-surface border border-surface-border rounded-2xl shadow-xl p-6 w-80 flex flex-col gap-4">
             <div>
-              <p className="text-sm font-semibold text-gray-800">Unsaved changes</p>
-              <p className="text-xs text-gray-500 mt-1">Do you want to save or discard your edits?</p>
+              <p className="text-sm font-semibold text-gray-100">Unsaved changes</p>
+              <p className="text-xs text-sidebar-muted mt-1">Do you want to save or discard your edits?</p>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => bulkUpdate.mutate(data, { onSuccess: () => { isDirtyRef.current = false; setShowModal(false); } })} disabled={bulkUpdate.isPending} className="flex-1 bg-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+              <Button onClick={() => bulkUpdate.mutate(data, { onSuccess: () => { isDirtyRef.current = false; setShowModal(false); } })} disabled={bulkUpdate.isPending} variant="primary" className="flex-1">
                 {bulkUpdate.isPending ? "Saving..." : "Save"}
-              </button>
-              <button onClick={handleDiscard} disabled={bulkUpdate.isPending} className="flex-1 border border-gray-300 text-gray-700 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50">Discard</button>
+              </Button>
+              <Button onClick={handleDiscard} disabled={bulkUpdate.isPending} variant="secondary" className="flex-1">Discard</Button>
             </div>
           </div>
         </div>
       )}
-      <div className="flex items-center px-4 py-3 border-b">
-        <p className="text-sm font-semibold text-gray-700">Transactions</p>
+      <div className="flex items-center px-4 py-3 border-b border-surface-border">
+        <p className="text-sm font-semibold text-gray-100">Transactions</p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-white/5 border-b border-surface-border">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((header) => (
-                  <th key={header.id} className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none" onClick={header.column.getToggleSortingHandler()}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                    {{ asc: " ↑", desc: " ↓" }[header.column.getIsSorted() as string] ?? ""}
+                  <th key={header.id} className="px-4 py-2 text-left text-xs font-semibold text-sidebar-muted uppercase tracking-wide cursor-pointer select-none hover:text-gray-200 transition-colors" onClick={header.column.getToggleSortingHandler()}>
+                    <span className="inline-flex items-center gap-1">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{ asc: <ArrowUp size={12} />, desc: <ArrowDown size={12} /> }[header.column.getIsSorted() as string] ?? null}
+                    </span>
                   </th>
                 ))}
               </tr>
@@ -159,7 +164,7 @@ export function TransactionsTable({ expenses }: Props) {
           </thead>
           <tbody>
             {visibleRows.map((row) => (
-              <tr key={row.id} className="border-b last:border-0 hover:bg-gray-50">
+              <tr key={row.id} className="border-b border-surface-border last:border-0 hover:bg-white/5 transition-colors">
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 py-2">{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                 ))}
@@ -167,15 +172,15 @@ export function TransactionsTable({ expenses }: Props) {
             ))}
           </tbody>
         </table>
-        {data.length === 0 && <p className="text-center text-gray-400 text-sm py-8">No transactions yet</p>}
+        {data.length === 0 && <p className="text-center text-sidebar-muted text-sm py-8">No transactions yet</p>}
         {allRows.length > PAGE_SIZE && (
-          <div className="px-4 py-3 border-t text-center">
-            <button onClick={() => setShowAll((v) => !v)} className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+          <div className="px-4 py-3 border-t border-surface-border text-center">
+            <button onClick={() => setShowAll((v) => !v)} className="text-xs text-accent-600 hover:text-accent-700 font-medium">
               {showAll ? "Show less" : `Show all ${allRows.length} transactions`}
             </button>
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

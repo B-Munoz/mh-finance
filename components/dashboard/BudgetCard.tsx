@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import type { Budget } from "@/types";
 import { AddExpenseModal } from "@/components/forms/AddExpenseModal";
+import { Card } from "@/components/ui/Card";
 
 interface Props {
   budget: Budget;
@@ -35,25 +37,25 @@ export function BudgetCard({ budget }: Props) {
 
   return (
     <>
-      <div className="relative bg-white rounded-lg border p-4 flex flex-col gap-2">
+      <Card padding="sm" className="relative flex flex-col gap-2 hover:shadow-md transition-shadow">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="absolute top-2 right-2 text-gray-300 hover:text-blue-600 text-2xl font-bold leading-none"
+          className="absolute top-3 right-3 text-sidebar-muted hover:text-accent-500 hover:bg-accent-500/10 rounded-lg p-1 transition-colors"
           aria-label={`Add expense to ${category}`}
         >
-          +
+          <Plus size={18} />
         </button>
         <div className="flex justify-between items-start pr-6">
-          <p className="font-medium text-sm">{category}</p>
-          {hasLimit && <span className="text-xs text-gray-400">/ {fmtAmount(limit)}</span>}
+          <p className="font-medium text-sm text-gray-100">{category}</p>
+          {hasLimit && <span className="text-xs text-sidebar-muted">/ {fmtAmount(limit)}</span>}
         </div>
-        <p className="text-xl font-bold">${current_balance.toLocaleString("es-CO", { maximumFractionDigits: 0 })}</p>
+        <p className="text-xl font-bold text-white">${current_balance.toLocaleString("es-CO", { maximumFractionDigits: 0 })}</p>
         {hasLimit && progress !== null && (
-          <div className="w-full bg-gray-100 rounded-full h-2">
+          <div className="w-full bg-surface-hover rounded-full h-2">
             <div className="h-2 rounded-full transition-all" style={barStyle} />
           </div>
         )}
-      </div>
+      </Card>
       {isModalOpen && <AddExpenseModal category={category} onClose={() => setIsModalOpen(false)} />}
     </>
   );
