@@ -35,7 +35,7 @@ export function LoginPage() {
     <div className="min-h-screen bg-sidebar flex items-center justify-center p-4">
       <Card padding="md" className="w-full max-w-sm shadow-md p-8">
         <div className="flex justify-center mb-6">
-          <img src="/logo.png" alt="MH Finance" className="h-[154px] w-auto rounded-2xl" />
+          <img src="/logo.svg" alt="MH Finance" className="h-[220px] w-auto rounded-2xl" />
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">

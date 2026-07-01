@@ -46,7 +46,7 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange }: Props) {
         `}
       >
         <div className="relative flex items-center justify-center p-5">
-          <img src="/logo.png" alt="MH Finance" className="w-32 h-auto rounded-lg" />
+          <img src="/logo.svg" alt="MH Finance" className="w-48 h-auto rounded-lg" />
           <button onClick={onClose} className="md:hidden absolute right-5 top-5 text-sidebar-muted hover:text-white" aria-label="Close sidebar">
             <X size={20} />
           </button>
