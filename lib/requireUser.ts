@@ -5,8 +5,12 @@ export async function requireUser(req: NextRequest): Promise<{ username: string;
   const authHeader = req.headers.get("authorization") ?? "";
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
   if (!token) throw Object.assign(new Error("Missing token"), { status: 401 });
-  const username = await decodeToken(token);
-  return { username, userKey: username };
+  try {
+    const username = await decodeToken(token);
+    return { username, userKey: username };
+  } catch {
+    throw Object.assign(new Error("Invalid or expired token"), { status: 401 });
+  }
 }
 
 export function apiError(err: unknown) {
