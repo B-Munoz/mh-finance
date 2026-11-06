@@ -28,6 +28,7 @@ export function TransactionsTable({ expenses }: Props) {
   const bulkUpdate = useBulkUpdateExpenses();
   const deleteExpense = useDeleteExpense();
   const [data, setData] = useState<Expense[]>([]);
+  const [amountDrafts, setAmountDrafts] = useState<Record<number, string>>({});
   const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
   const [showModal, setShowModal] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -46,6 +47,7 @@ export function TransactionsTable({ expenses }: Props) {
 
   useEffect(() => {
     setData(expenses);
+    setAmountDrafts({});
     isDirtyRef.current = false;
     setShowModal(false);
   }, [expenses]);
@@ -59,7 +61,6 @@ export function TransactionsTable({ expenses }: Props) {
     isDirtyRef.current = true;
   }, []);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const columns = useMemo(() => [
     col.accessor("date", {
       header: "Date",
@@ -84,10 +85,22 @@ export function TransactionsTable({ expenses }: Props) {
       cell: (info) => (
         <input
           type="text"
-          inputMode="numeric"
-          value={info.getValue().toLocaleString("es-CO", { maximumFractionDigits: 0 })}
-          onChange={(e) => { const parsed = parseFloat(e.target.value.replace(/\./g, "")); if (!isNaN(parsed)) updateCell(info.row.index, "amount", parsed); }}
-          onBlur={() => { if (isDirtyRef.current) setShowModal(true); }}
+          inputMode="decimal"
+          value={amountDrafts[info.row.original.id] ?? String(info.getValue())}
+          onChange={(e) => {
+            const value = e.target.value;
+            setAmountDrafts((prev) => ({ ...prev, [info.row.original.id]: value }));
+            const parsed = Number(value);
+            if (value.trim() && Number.isFinite(parsed) && parsed >= 0) updateCell(info.row.index, "amount", parsed);
+          }}
+          onBlur={() => {
+            setAmountDrafts((prev) => {
+              const next = { ...prev };
+              delete next[info.row.original.id];
+              return next;
+            });
+            if (isDirtyRef.current) setShowModal(true);
+          }}
           onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
           className="border-0 bg-transparent text-sm w-full text-right rounded px-1 -mx-1 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:bg-white/5 text-gray-100 transition-colors"
         />
@@ -113,7 +126,7 @@ export function TransactionsTable({ expenses }: Props) {
         );
       },
     }),
-  ], []);
+  ], [amountDrafts, updateCell]);
 
   const table = useReactTable({ data, columns, state: { sorting }, onSortingChange: setSorting, getCoreRowModel: getCoreRowModel(), getSortedRowModel: getSortedRowModel() });
   const allRows = table.getRowModel().rows;
@@ -121,6 +134,7 @@ export function TransactionsTable({ expenses }: Props) {
 
   function handleDiscard() {
     setData(expensesRef.current);
+    setAmountDrafts({});
     isDirtyRef.current = false;
     setShowModal(false);
   }
@@ -135,7 +149,7 @@ export function TransactionsTable({ expenses }: Props) {
               <p className="text-xs text-sidebar-muted mt-1">Do you want to save or discard your edits?</p>
             </div>
             <div className="flex gap-3">
-              <Button onClick={() => bulkUpdate.mutate(data, { onSuccess: () => { isDirtyRef.current = false; setShowModal(false); } })} disabled={bulkUpdate.isPending} variant="primary" className="flex-1">
+              <Button onClick={() => bulkUpdate.mutate(data, { onSuccess: () => { isDirtyRef.current = false; setAmountDrafts({}); setShowModal(false); } })} disabled={bulkUpdate.isPending} variant="primary" className="flex-1">
                 {bulkUpdate.isPending ? "Saving..." : "Save"}
               </Button>
               <Button onClick={handleDiscard} disabled={bulkUpdate.isPending} variant="secondary" className="flex-1">Discard</Button>

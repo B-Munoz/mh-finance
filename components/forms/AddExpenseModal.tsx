@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useCreateExpense } from "@/hooks/useExpenses";
-import { formatWithSeparator, parseAmount } from "@/lib/format";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -21,8 +20,8 @@ export function AddExpenseModal({ category, onClose }: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!displayAmount) return;
-    const amount = parseAmount(displayAmount);
-    if (!amount) return;
+    const amount = Number(displayAmount);
+    if (!Number.isFinite(amount) || amount <= 0) return;
     createExpense.mutate({ category, description, amount }, { onSuccess: () => onClose() });
   }
 
@@ -38,10 +37,10 @@ export function AddExpenseModal({ category, onClose }: Props) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input
           type="text"
-          inputMode="numeric"
-          placeholder="Amount"
+          inputMode="decimal"
+          placeholder="Amount (e.g. 3.91)"
           value={displayAmount}
-          onChange={(e) => setDisplayAmount(formatWithSeparator(e.target.value))}
+          onChange={(e) => setDisplayAmount(e.target.value)}
           autoFocus
           required
         />

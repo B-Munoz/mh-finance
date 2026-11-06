@@ -49,7 +49,7 @@ export function ExpensesChart({ expenses }: Props) {
 
   const byCategory: Record<string, number> = {};
   for (const e of filtered) byCategory[e.category] = (byCategory[e.category] ?? 0) + e.amount;
-  const data = Object.entries(byCategory).map(([category, amount]) => ({ category, amount: Math.round(amount) }));
+  const data = Object.entries(byCategory).map(([category, amount]) => ({ category, amount }));
 
   const periodLabel =
     period === "month" ? `${MONTHS_ES[selectedMonth - 1]} ${selectedYear}`
@@ -98,7 +98,7 @@ export function ExpensesChart({ expenses }: Props) {
             <XAxis dataKey="category" tick={{ fontSize: 11, fill: "#94a3b8" }} />
             <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
             <Tooltip
-              formatter={(v: number) => `$${v.toLocaleString("es-CO")}`}
+              formatter={(v: number) => `$${v.toLocaleString("es-CO", { maximumFractionDigits: 2 })}`}
               contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
               labelStyle={{ color: "#f1f5f9" }}
               itemStyle={{ color: "#f1f5f9" }}
