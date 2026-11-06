@@ -2,6 +2,9 @@ export type UserConfig = {
   categories: string[];
   limits: Record<string, number>;
   allocation_pct: Record<string, number>;
+  allocation_mode: "percentage" | "amount";
+  allocation_total: number;
+  allocation_amounts: Record<string, number>;
 };
 
 export const DEFAULT_CONFIG: Record<string, UserConfig> = {
@@ -15,6 +18,12 @@ export const DEFAULT_CONFIG: Record<string, UserConfig> = {
       Transporte: 0.03, Vivienda: 0.23, Ocio: 0.08, Salud: 0.02,
       Ropa: 0.02, "Misceláneo": 0.18, Departamento: 0.05, Ahorro: 0.32, Vacaciones: 0.07,
     },
+    allocation_mode: "percentage",
+    allocation_total: 0,
+    allocation_amounts: {
+      Transporte: 0, Vivienda: 0, Ocio: 0, Salud: 0, Ropa: 0,
+      "Misceláneo": 0, Departamento: 0, Ahorro: 0, Vacaciones: 0,
+    },
   },
   pachi: {
     categories: ["Transporte", "Ocio", "Salud", "Ropa", "Misceláneo", "Saula", "Vacaciones", "Ahorro", "Europa"],
@@ -25,6 +34,12 @@ export const DEFAULT_CONFIG: Record<string, UserConfig> = {
     allocation_pct: {
       Transporte: 0.15, Ocio: 0.10, Salud: 0.10, Ropa: 0.038,
       "Misceláneo": 0.132, Saula: 0.03, Vacaciones: 0.05, Ahorro: 0.10, Europa: 0.30,
+    },
+    allocation_mode: "percentage",
+    allocation_total: 0,
+    allocation_amounts: {
+      Transporte: 0, Ocio: 0, Salud: 0, Ropa: 0, "Misceláneo": 0,
+      Saula: 0, Vacaciones: 0, Ahorro: 0, Europa: 0,
     },
   },
 };

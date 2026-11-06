@@ -8,7 +8,10 @@ export async function POST(req: NextRequest) {
     const { userKey } = await requireUser(req);
     const { income_amount } = await req.json();
     const cfg = await getEffectiveConfig(userKey);
-    const allocations = await allocateIncome(userKey, income_amount, cfg.allocation_pct, cfg.limits);
+    const allocationMap = cfg.allocation_mode === "amount"
+      ? Object.fromEntries(cfg.categories.map((cat) => [cat, cfg.allocation_amounts[cat] / cfg.allocation_total]))
+      : cfg.allocation_pct;
+    const allocations = await allocateIncome(userKey, income_amount, allocationMap, cfg.limits);
     return Response.json({ allocations });
   } catch (err) {
     return apiError(err);

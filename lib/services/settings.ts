@@ -17,12 +17,14 @@ async function saveCategoryState(
   userKey: string,
   names: string[],
   allocation_pct: Record<string, number>,
+  allocation_amounts: Record<string, number>,
   limits: Record<string, number>,
 ) {
   const sql = getDb(userKey);
   await sql.transaction([
     sql`INSERT INTO user_settings (key, value) VALUES ('category_names', ${JSON.stringify(names)}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
     sql`INSERT INTO user_settings (key, value) VALUES ('allocation_pct', ${JSON.stringify(allocation_pct)}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+    sql`INSERT INTO user_settings (key, value) VALUES ('allocation_amounts', ${JSON.stringify(allocation_amounts)}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
     sql`INSERT INTO user_settings (key, value) VALUES ('category_limits', ${JSON.stringify(limits)}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
   ]);
 }
@@ -33,28 +35,42 @@ export async function getEffectiveConfig(userKey: string): Promise<UserConfig> {
 
   let categories = [...fallback.categories];
   let allocation_pct = { ...fallback.allocation_pct };
+  let allocation_amounts = { ...fallback.allocation_amounts };
   let limits = { ...fallback.limits };
+  const allocation_mode = rows.allocation_mode === "amount" ? "amount" : "percentage";
+  const allocation_total = rows.allocation_total ? Number(rows.allocation_total) : fallback.allocation_total;
 
   if (rows.allocation_pct) allocation_pct = JSON.parse(rows.allocation_pct);
+  if (rows.allocation_amounts) allocation_amounts = JSON.parse(rows.allocation_amounts);
   if (rows.category_limits) limits = JSON.parse(rows.category_limits);
   if (rows.category_names) {
     categories = JSON.parse(rows.category_names);
     allocation_pct = Object.fromEntries(categories.map((n) => [n, allocation_pct[n] ?? 0]));
+    allocation_amounts = Object.fromEntries(categories.map((n) => [n, allocation_amounts[n] ?? 0]));
     limits = Object.fromEntries(categories.map((n) => [n, limits[n] ?? 0]));
   }
 
-  return { categories, allocation_pct, limits };
+  return { categories, allocation_pct, limits, allocation_mode, allocation_total, allocation_amounts };
 }
 
 export async function getSettings(userKey: string) {
   const cfg = await getEffectiveConfig(userKey);
-  return { allocation_pct: cfg.allocation_pct, category_limits: cfg.limits };
+  return {
+    allocation_pct: cfg.allocation_pct,
+    category_limits: cfg.limits,
+    allocation_mode: cfg.allocation_mode,
+    allocation_total: cfg.allocation_total,
+    allocation_amounts: cfg.allocation_amounts,
+  };
 }
 
 export async function saveSettings(
   userKey: string,
   allocation_pct: Record<string, number> | null,
   category_limits: Record<string, number> | null,
+  allocation_mode: "percentage" | "amount" | null,
+  allocation_total: number | null,
+  allocation_amounts: Record<string, number> | null,
 ) {
   const sql = getDb(userKey);
   const queries = [];
@@ -66,6 +82,21 @@ export async function saveSettings(
   if (category_limits !== null) {
     queries.push(
       sql`INSERT INTO user_settings (key, value) VALUES ('category_limits', ${JSON.stringify(category_limits)}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+    );
+  }
+  if (allocation_mode !== null) {
+    queries.push(
+      sql`INSERT INTO user_settings (key, value) VALUES ('allocation_mode', ${allocation_mode}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+    );
+  }
+  if (allocation_total !== null) {
+    queries.push(
+      sql`INSERT INTO user_settings (key, value) VALUES ('allocation_total', ${String(allocation_total)}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+    );
+  }
+  if (allocation_amounts !== null) {
+    queries.push(
+      sql`INSERT INTO user_settings (key, value) VALUES ('allocation_amounts', ${JSON.stringify(allocation_amounts)}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
     );
   }
   if (queries.length > 0) await sql.transaction(queries);
@@ -80,8 +111,9 @@ export async function addCategory(userKey: string, name: string) {
 
   const names = [...effective.categories, name];
   const alloc_pct = { ...effective.allocation_pct, [name]: 0 };
+  const alloc_amounts = { ...effective.allocation_amounts, [name]: 0 };
   const limits = { ...effective.limits, [name]: 0 };
-  await saveCategoryState(userKey, names, alloc_pct, limits);
+  await saveCategoryState(userKey, names, alloc_pct, alloc_amounts, limits);
 }
 
 export async function deleteCategory(userKey: string, name: string) {
@@ -100,8 +132,9 @@ export async function deleteCategory(userKey: string, name: string) {
 
   const names = effective.categories.filter((n) => n !== name);
   const alloc_pct = Object.fromEntries(Object.entries(effective.allocation_pct).filter(([k]) => k !== name));
+  const alloc_amounts = Object.fromEntries(Object.entries(effective.allocation_amounts).filter(([k]) => k !== name));
   const limits = Object.fromEntries(Object.entries(effective.limits).filter(([k]) => k !== name));
-  await saveCategoryState(userKey, names, alloc_pct, limits);
+  await saveCategoryState(userKey, names, alloc_pct, alloc_amounts, limits);
 }
 
 export async function renameCategory(userKey: string, oldName: string, newName: string) {
@@ -116,8 +149,11 @@ export async function renameCategory(userKey: string, oldName: string, newName: 
   const alloc_pct = Object.fromEntries(
     Object.entries(effective.allocation_pct).map(([k, v]) => [k === oldName ? newName : k, v]),
   );
+  const alloc_amounts = Object.fromEntries(
+    Object.entries(effective.allocation_amounts).map(([k, v]) => [k === oldName ? newName : k, v]),
+  );
   const limits = Object.fromEntries(
     Object.entries(effective.limits).map(([k, v]) => [k === oldName ? newName : k, v]),
   );
-  await saveCategoryState(userKey, names, alloc_pct, limits);
+  await saveCategoryState(userKey, names, alloc_pct, alloc_amounts, limits);
 }

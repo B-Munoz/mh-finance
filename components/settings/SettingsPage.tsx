@@ -17,6 +17,9 @@ export function SettingsPage() {
   const renameCat = useRenameCategory();
 
   const [allocPct, setAllocPct] = useState<Record<string, string>>({});
+  const [allocAmounts, setAllocAmounts] = useState<Record<string, string>>({});
+  const [allocationMode, setAllocationMode] = useState<"percentage" | "amount">("percentage");
+  const [allocationTotal, setAllocationTotal] = useState("");
   const [limits, setLimits] = useState<Record<string, string>>({});
   const [renamingCat, setRenamingCat] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -30,6 +33,11 @@ export function SettingsPage() {
     const pct: Record<string, string> = {};
     for (const [cat, val] of Object.entries(settings.allocation_pct)) pct[cat] = String(Math.round(val * 100));
     setAllocPct(pct);
+    const amounts: Record<string, string> = {};
+    for (const [cat, val] of Object.entries(settings.allocation_amounts)) amounts[cat] = formatWithSeparator(String(val));
+    setAllocAmounts(amounts);
+    setAllocationMode(settings.allocation_mode);
+    setAllocationTotal(formatWithSeparator(String(settings.allocation_total)));
     const lim: Record<string, string> = {};
     for (const [cat, val] of Object.entries(settings.category_limits)) lim[cat] = String(val);
     setLimits(lim);
@@ -40,15 +48,27 @@ export function SettingsPage() {
 
   const categories = Object.keys(settings.allocation_pct);
   const totalPct = Object.values(allocPct).reduce((sum, v) => sum + (parseFloat(v) || 0), 0);
-  const sumOk = totalPct <= 100 + 1e-6;
+  const totalAmount = allocationTotal ? parseAmount(allocationTotal) : 0;
+  const assignedAmount = Object.values(allocAmounts).reduce((sum, v) => sum + (v ? parseAmount(v) : 0), 0);
+  const sumOk = allocationMode === "percentage"
+    ? totalPct <= 100 + 1e-6
+    : totalAmount > 0 && Math.abs(assignedAmount - totalAmount) <= 0.01;
   const sampleIncome = sampleIncomeDisplay ? parseAmount(sampleIncomeDisplay) : 0;
 
   function handleSave() {
     const allocation_pct: Record<string, number> = {};
     for (const [cat, v] of Object.entries(allocPct)) allocation_pct[cat] = (parseFloat(v) || 0) / 100;
+    const allocation_amounts: Record<string, number> = {};
+    for (const [cat, v] of Object.entries(allocAmounts)) allocation_amounts[cat] = v ? parseAmount(v) : 0;
     const category_limits: Record<string, number> = {};
     for (const [cat, v] of Object.entries(limits)) category_limits[cat] = parseFloat(v) || 0;
-    save.mutate({ allocation_pct, category_limits });
+    save.mutate({
+      allocation_pct,
+      category_limits,
+      allocation_mode: allocationMode,
+      allocation_total: totalAmount,
+      allocation_amounts,
+    });
   }
 
   function submitRename(cat: string) {
@@ -125,11 +145,23 @@ export function SettingsPage() {
 
       <Card className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-gray-100">Allocation Percentages</h2>
+          <h2 className="font-semibold text-gray-100">Income Allocation</h2>
           <span className={cn("text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1", sumOk ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400")}>
-            Total: {totalPct.toFixed(0)}% {sumOk ? <Check size={14} /> : <X size={14} />}
+            {allocationMode === "percentage"
+              ? <>Total: {totalPct.toFixed(0)}%</>
+              : <>Assigned: {formatCurrency(assignedAmount)} / {formatCurrency(totalAmount)}</>}
+            {sumOk ? <Check size={14} /> : <X size={14} />}
           </span>
         </div>
+        <div className="flex gap-1 bg-white/5 rounded-lg p-1">
+          <button type="button" onClick={() => setAllocationMode("percentage")} className={cn("flex-1 text-xs font-medium py-1.5 rounded-md transition-colors", allocationMode === "percentage" ? "bg-accent-600 text-white" : "text-sidebar-muted hover:text-gray-100")}>Percentages</button>
+          <button type="button" onClick={() => setAllocationMode("amount")} className={cn("flex-1 text-xs font-medium py-1.5 rounded-md transition-colors", allocationMode === "amount" ? "bg-accent-600 text-white" : "text-sidebar-muted hover:text-gray-100")}>Amounts</button>
+        </div>
+        <p className="text-xs text-sidebar-muted -mt-2">
+          {allocationMode === "percentage"
+            ? "Choose each category's share of income. Shares may total up to 100%."
+            : "Set a total and split it across categories. Each income is distributed using the same proportions."}
+        </p>
         <div className="flex items-center gap-3 bg-white/5 rounded-lg p-3">
           <label className="text-sm text-gray-300 font-medium whitespace-nowrap">Sample income</label>
           <input
@@ -141,19 +173,50 @@ export function SettingsPage() {
             className="bg-surface-hover border border-surface-border text-gray-100 rounded-lg px-3 py-1.5 text-sm w-full text-right focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-colors"
           />
         </div>
+        {allocationMode === "amount" && (
+          <div className="flex items-center gap-3">
+            <label className="flex-1 text-sm text-gray-100">Total allocation amount (COP)</label>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="0"
+              value={allocationTotal}
+              onChange={(e) => setAllocationTotal(formatWithSeparator(e.target.value))}
+              className="w-36 text-right"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-3">
           {categories.map((cat) => (
             <div key={cat} className="flex items-center gap-3">
               <span className="flex-1 text-sm text-gray-100">{cat}</span>
-              {sampleIncome > 0 && (
+              {sampleIncome > 0 && allocationMode === "percentage" && (
                 <span className="text-xs text-sidebar-muted tabular-nums w-28 text-right">
                   {formatCurrency(calcAllocationAmount(parseFloat(allocPct[cat]) || 0, sampleIncome))}
                 </span>
               )}
-              <div className="flex items-center gap-1">
-                <Input type="number" min="0" max="100" step="1" value={allocPct[cat] ?? ""} onChange={(e) => setAllocPct((prev) => ({ ...prev, [cat]: e.target.value }))} className="w-20 text-right" />
-                <span className="text-sm text-sidebar-muted">%</span>
-              </div>
+              {sampleIncome > 0 && allocationMode === "amount" && totalAmount > 0 && (
+                <span className="text-xs text-sidebar-muted tabular-nums w-28 text-right">
+                  {formatCurrency(((allocAmounts[cat] ? parseAmount(allocAmounts[cat]) : 0) / totalAmount) * sampleIncome)}
+                </span>
+              )}
+              {allocationMode === "percentage" ? (
+                <div className="flex items-center gap-1">
+                  <Input type="number" min="0" max="100" step="1" value={allocPct[cat] ?? ""} onChange={(e) => setAllocPct((prev) => ({ ...prev, [cat]: e.target.value }))} className="w-20 text-right" />
+                  <span className="text-sm text-sidebar-muted">%</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    value={allocAmounts[cat] ?? ""}
+                    onChange={(e) => setAllocAmounts((prev) => ({ ...prev, [cat]: formatWithSeparator(e.target.value) }))}
+                    className="w-36 text-right"
+                  />
+                  <span className="text-xs text-sidebar-muted">COP</span>
+                </div>
+              )}
             </div>
           ))}
         </div>

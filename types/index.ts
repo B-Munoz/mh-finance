@@ -16,6 +16,9 @@ export interface UserConfig {
   categories: string[];
   limits: Record<string, number>;
   allocation_pct: Record<string, number>;
+  allocation_mode: "percentage" | "amount";
+  allocation_total: number;
+  allocation_amounts: Record<string, number>;
 }
 
 export interface AllocationResult {
@@ -46,4 +49,7 @@ export interface DirectDepositResult {
 export interface UserSettings {
   allocation_pct: Record<string, number>;
   category_limits: Record<string, number>;
+  allocation_mode: "percentage" | "amount";
+  allocation_total: number;
+  allocation_amounts: Record<string, number>;
 }
