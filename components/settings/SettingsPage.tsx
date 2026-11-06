@@ -175,7 +175,7 @@ export function SettingsPage() {
         </div>
         {allocationMode === "amount" && (
           <div className="flex items-center gap-3">
-            <label className="flex-1 text-sm text-gray-100">Total allocation amount (COP)</label>
+            <label className="flex-1 text-sm text-gray-100">Total allocation amount (GBP)</label>
             <Input
               type="text"
               inputMode="numeric"
@@ -214,7 +214,7 @@ export function SettingsPage() {
                     onChange={(e) => setAllocAmounts((prev) => ({ ...prev, [cat]: formatWithSeparator(e.target.value) }))}
                     className="w-36 text-right"
                   />
-                  <span className="text-xs text-sidebar-muted">COP</span>
+                  <span className="text-xs text-sidebar-muted">GBP</span>
                 </div>
               )}
             </div>
